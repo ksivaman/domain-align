@@ -30,11 +30,13 @@ pascallabels['dog'] = 17
 pascallabels['horse'] = 18
 pascallabels['sheep'] = 19
 
-path_to_model_dict = '/local/a/ksivaman/dataset-bias/models/pascal.pth'
+path_to_model_dict = '/local/a/ksivaman/dataset-bias/models/pascal_scratch.pth'
 
-model = models.resnet18(pretrained=True)
+model = models.resnet18(pretrained=False)
 
-fc = torch.nn.Sequential(
+model = torch.nn.Sequential(
+                            model,
+
                             torch.nn.Linear(1000, 256),
                             torch.nn.ReLU(),
                             torch.nn.Dropout(0.5),
@@ -43,17 +45,13 @@ fc = torch.nn.Sequential(
                             torch.nn.LogSoftmax(dim=1)
 )
 
-model.fullconn = fc
-
 for param in model.parameters():
     param.requires_grad = False
 
 model_dict = torch.load(path_to_model_dict)
 model.load_state_dict(model_dict)
 
-# print(model)
-
-root_img='/local/a/ksivaman/data/VOCdevkit/VOC2007/JPEGfew/000001.jpg'
+root_img='/local/a/ksivaman/data/VOCdevkit/VOC2007/JPEGImages/000003.jpg'
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -71,5 +69,4 @@ img_torch = img_torch.unsqueeze(dim=0)
 model.to(device)
 
 logps = model(img_torch)
-print('Class num: ', np.argmax(logps.detach().cpu()))
-
+print(np.argmax(torch.exp(logps).detach().cpu()))
