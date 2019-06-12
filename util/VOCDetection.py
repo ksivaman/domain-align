@@ -5,34 +5,6 @@ import numpy as np
 from torch.utils.data.dataset import Dataset
 from PIL import Image
 
-
-# root_label = '/local/a/ksivaman/data/VOCdevkit/VOC2007/Annotations'
-# for label in os.listdir(root_label):
-#     lab = open(root_label + '/' + label, 'r')
-#     tree = ET.parse(lab) 
-#     root = tree.getroot()
-#     gotLabel = False
-
-#     if gotLabel == False:
-#         for item in root.findall('./object'): 
-#             if gotLabel == False:
-#                 for child in item:
-#                     if child.tag == 'name' and gotLabel == False:
-#                         print(child.text)
-#                         gotLabel = True
-
-#     lab.close()
-
-# root_img='/local/a/ksivaman/data/VOCdevkit/VOC2007/JPEGfew'
-# # root_img_new ='/local/a/ksivaman/data/VOCdevkit/VOC2007/testtransform/'
-
-# for img in os.listdir(root_img):
-#     im = Image.open(root_img + '/' + img)
-#     im = im.resize((224, 224))
-#     img_np = np.array(im)
-#     img_torch = torch.from_numpy(img_np)
-#     img_torch = img_torch.view((3, 224, 224))
-
 class VOCDetection(Dataset):
     def __init__(self, labelstrtonum, height=224, width=224, root_img='/local/a/ksivaman/data/VOCdevkit/VOC2007/JPEGImages', root_label='/local/a/ksivaman/data/VOCdevkit/VOC2007/Annotations', transforms=None):
         """
@@ -65,8 +37,12 @@ class VOCDetection(Dataset):
                     if gotLabel == False:
                         for child in item:
                             if child.tag == 'name' and gotLabel == False:
-                                self.labels.append(labelstrtonum[str(child.text)])
-                                gotLabel = True
+                                if child.text == 'person':
+                                    self.labels.append(labelstrtonum[str(child.text)])
+                                    gotLabel = True
+                                else:
+                                    self.labels.append(labelstrtonum['noperson'])
+                                    gotLabel = True
 
             lab.close()
 
